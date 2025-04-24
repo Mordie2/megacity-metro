@@ -6,14 +6,20 @@ using Unity.MegacityMetro.Gameplay;
 using Unity.Physics;
 using Unity.Transforms;
 using UnityEngine;
+using FMODUnity;
+
 
 [UpdateInGroup(typeof(PresentationSystemGroup))]
 [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation | WorldSystemFilterFlags.LocalSimulation)]
+
+public struct EngineSoundTrigger : IComponentData { }
+
 public partial struct VehicleFXSystem : ISystem
 {
     private static int ID_FXParam_BeamLength = 0;
     private static int ID_FXParam_HitEffectActive = 0;
     private static int ID_FXParam_ShieldLifetime = 0;
+
 
     public void OnCreate(ref SystemState state)
     {
@@ -83,7 +89,8 @@ public partial struct VehicleFXSystem : ISystem
                         if (laserActive && !fxManager.SFXLaserBeam.isPlaying)
                         {
                             fxManager.SFXLaserBeam.Play();
-                            
+                            RuntimeManager.PlayOneShot("event:/asd", laser.ValueRO.VFXLaserStartNode);
+
                         }
                         else if (!laserActive && fxManager.SFXLaserBeam.isPlaying)
                         {
@@ -117,6 +124,7 @@ public partial struct VehicleFXSystem : ISystem
                     {
                         if (vehicleHealth.ValueRO.IsDead == 0)
                         {
+                            
                             float speedFactor = math.saturate(math.length(velocity.ValueRO.Linear) / 30f);
                             fxManager.SFXCarSound.pitch = math.lerp(1f, 2f, speedFactor);
                         }

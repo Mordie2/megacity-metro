@@ -21,7 +21,10 @@
         "Unity.Entities.Build",
         "Unity.Scenes",
         "Unity.MegacityMetro.Utils",
-        "FMODUnity"
+        "FMODUnity",
+        "FMODUnityEditor",
+        "FMODUnityResonance",
+        "FMODUnityResonanceEditor"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

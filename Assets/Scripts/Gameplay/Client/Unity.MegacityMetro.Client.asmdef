@@ -29,7 +29,11 @@
         "Unity.Services.UGS.Authentication",
         "Unity.Services.Authentication",
         "Unity.Services.Multiplayer",
-        "Unity.MegacityMetro.Common"
+        "Unity.MegacityMetro.Common",
+        "FMODUnity",
+        "FMODUnityEditor",
+        "FMODUnityResonance",
+        "FMODUnityResonanceEditor"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
