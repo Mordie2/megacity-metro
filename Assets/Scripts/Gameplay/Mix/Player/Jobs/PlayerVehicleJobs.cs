@@ -7,7 +7,6 @@ using Unity.NetCode;
 using UnityEngine;
 using Utils.Misc;
 
-
 namespace Unity.MegacityMetro.Gameplay
 {
     [BurstCompile]
@@ -36,7 +35,7 @@ namespace Unity.MegacityMetro.Gameplay
     {
         public float DeltaTime;
         const float BaseSteeringSpeedMultiplier = 0.01f;
-
+        
         public void Execute(
             in PlayerVehicleInput controlInput,
             in PlayerVehicleSettings vehicleSettings,
@@ -51,6 +50,7 @@ namespace Unity.MegacityMetro.Gameplay
             }
             else
             {
+
                 // Pitch & Yaw
                 float2 smoothedLookVelocity = math.lerp(vehicleMovementState.LastLookVelocity, controlInput.LookVelocity, MathUtilities.GetSharpnessInterpolant(vehicleSettings.LookVelocitySharpness, DeltaTime));
                 

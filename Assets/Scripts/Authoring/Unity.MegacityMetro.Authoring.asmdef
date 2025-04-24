@@ -20,7 +20,8 @@
         "Unity.MegacityMetro.Components",
         "Unity.Entities.Build",
         "Unity.Scenes",
-        "Unity.MegacityMetro.Utils"
+        "Unity.MegacityMetro.Utils",
+        "FMODUnity"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

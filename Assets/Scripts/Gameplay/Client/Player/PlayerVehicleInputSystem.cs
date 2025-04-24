@@ -98,18 +98,27 @@ namespace Unity.MegacityMetro.Gameplay
                 };
                 lookInput *= ConstLookVelocityMultiplier;
             }
-            
+
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
+            var cheatPressed = gameplayInputActions.Cheat_1.IsPressed();
+            if (cheatPressed)
+            {
+                UnityEngine.Debug.LogWarning("Cheat_1 pressed: input is registered!");
+            }
+#endif
+
             var input = new PlayerVehicleInput
             {
-                Acceleration = math.clamp(gameplayInputActions.Move.ReadValue<float>(), accelerationRange.x, accelerationRange.y), 
+                Acceleration = math.clamp(gameplayInputActions.Move.ReadValue<float>(), accelerationRange.x, accelerationRange.y),
                 Roll = gameplayInputActions.Roll.ReadValue<float>(),
                 LookVelocity = lookInput,
                 Shoot = gameplayInputActions.Fire.IsPressed(),
                 AimAssistSensitivity = controlSettings.AimAssistanceSensitivity,
 #if DEVELOPMENT_BUILD || UNITY_EDITOR
-                Cheat_1 = gameplayInputActions.Cheat_1.IsPressed()
+                Cheat_1 = cheatPressed
 #endif
             };
+
 #endif
 
             var job = new PlayerVehicleInputJob { CollectedInput = input};

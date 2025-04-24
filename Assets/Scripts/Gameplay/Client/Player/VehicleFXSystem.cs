@@ -1,5 +1,6 @@
 using MegacityMetro.Pooling;
 using Unity.Entities;
+using Unity.Entities.Content;
 using Unity.Mathematics;
 using Unity.MegacityMetro.Gameplay;
 using Unity.Physics;
@@ -19,6 +20,7 @@ public partial struct VehicleFXSystem : ISystem
         ID_FXParam_BeamLength = Shader.PropertyToID("Length");
         ID_FXParam_HitEffectActive = Shader.PropertyToID("HitEffect");
         ID_FXParam_ShieldLifetime = Shader.PropertyToID("Lifetime");
+
     }
 
     public void OnUpdate(ref SystemState state)
@@ -81,6 +83,7 @@ public partial struct VehicleFXSystem : ISystem
                         if (laserActive && !fxManager.SFXLaserBeam.isPlaying)
                         {
                             fxManager.SFXLaserBeam.Play();
+                            
                         }
                         else if (!laserActive && fxManager.SFXLaserBeam.isPlaying)
                         {
