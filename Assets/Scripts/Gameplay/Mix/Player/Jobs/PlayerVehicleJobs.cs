@@ -7,6 +7,7 @@ using Unity.NetCode;
 using UnityEngine;
 using Utils.Misc;
 
+
 namespace Unity.MegacityMetro.Gameplay
 {
     [BurstCompile]
@@ -18,7 +19,7 @@ namespace Unity.MegacityMetro.Gameplay
             localTransform.Rotation = vehicleMovementState.CalculateTargetRotation();
         }
     }
-    
+
     [BurstCompile]
     [WithDisabled(typeof(GhostOwnerIsLocal))]
     internal partial struct InterpolatedVehicleRotationJob : IJobEntity
@@ -35,7 +36,7 @@ namespace Unity.MegacityMetro.Gameplay
     {
         public float DeltaTime;
         const float BaseSteeringSpeedMultiplier = 0.01f;
-        
+
         public void Execute(
             in PlayerVehicleInput controlInput,
             in PlayerVehicleSettings vehicleSettings,
@@ -50,10 +51,9 @@ namespace Unity.MegacityMetro.Gameplay
             }
             else
             {
-
                 // Pitch & Yaw
                 float2 smoothedLookVelocity = math.lerp(vehicleMovementState.LastLookVelocity, controlInput.LookVelocity, MathUtilities.GetSharpnessInterpolant(vehicleSettings.LookVelocitySharpness, DeltaTime));
-                
+
                 float rotationSpeed = BaseSteeringSpeedMultiplier * vehicleSettings.SteeringSpeed;
                 float maxPitchRadians = math.radians(vehicleSettings.MaxPitchAngle);
                 float yawDelta = (smoothedLookVelocity.y * rotationSpeed * DeltaTime);
@@ -63,7 +63,7 @@ namespace Unity.MegacityMetro.Gameplay
                 float3 forward = math.mul(newRotation, math.forward());
 
                 vehicleMovementState.LastLookVelocity = smoothedLookVelocity;
-                
+
                 // Acceleration
                 {
                     float chosenAcceleration = vehicleSettings.Acceleration;
@@ -145,7 +145,7 @@ namespace Unity.MegacityMetro.Gameplay
             {
                 immunity.Counter -= DeltaTime;
             }
-            
+
             // Death
             // Add a threshold to avoid the death UI
             if (math.abs(health.Value) < 0.01f && health.IsDead == 0)

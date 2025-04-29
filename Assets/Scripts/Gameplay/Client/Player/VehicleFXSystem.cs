@@ -1,36 +1,30 @@
 using MegacityMetro.Pooling;
 using Unity.Entities;
-using Unity.Entities.Content;
 using Unity.Mathematics;
 using Unity.MegacityMetro.Gameplay;
 using Unity.Physics;
 using Unity.Transforms;
 using UnityEngine;
-using FMODUnity;
-
 
 [UpdateInGroup(typeof(PresentationSystemGroup))]
 [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation | WorldSystemFilterFlags.LocalSimulation)]
-
-public struct EngineSoundTrigger : IComponentData { }
-
 public partial struct VehicleFXSystem : ISystem
 {
     private static int ID_FXParam_BeamLength = 0;
     private static int ID_FXParam_HitEffectActive = 0;
     private static int ID_FXParam_ShieldLifetime = 0;
 
-
     public void OnCreate(ref SystemState state)
     {
         ID_FXParam_BeamLength = Shader.PropertyToID("Length");
         ID_FXParam_HitEffectActive = Shader.PropertyToID("HitEffect");
         ID_FXParam_ShieldLifetime = Shader.PropertyToID("Lifetime");
-
     }
 
     public void OnUpdate(ref SystemState state)
     {
+        var ecb = new EntityCommandBuffer(Unity.Collections.Allocator.Temp);
+
         var laserVisualJob = new LaserVisualJob
         {
             LocalToWorldLookup = SystemAPI.GetComponentLookup<LocalToWorld>(true),
@@ -86,15 +80,30 @@ public partial struct VehicleFXSystem : ISystem
                         }
 
                         // Beam audio
-                        if (laserActive && !fxManager.SFXLaserBeam.isPlaying)
+                        if (laserActive)
                         {
-                            fxManager.SFXLaserBeam.Play();
-                            RuntimeManager.PlayOneShot("event:/asd", laser.ValueRO.VFXLaserStartNode);
-
+                            //fxManager.SFXLaserBeam.Play();
+                            if (!state.EntityManager.HasComponent<LaserSoundRequest>(entity))
+                            {
+                                ecb.AddComponent(entity, new LaserSoundRequest
+                                {
+                                    Entity = entity,
+                                    Position = laser.ValueRO.VFXLaserStartNode,
+                                    IsFiring = laserActive
+                                });
+                                //Debug.Log("Start");
+                            }
                         }
-                        else if (!laserActive && fxManager.SFXLaserBeam.isPlaying)
+                        else if (!laserActive)
                         {
-                            fxManager.SFXLaserBeam.Stop();
+                            //fxManager.SFXLaserBeam.Stop();
+                            //Debug.Log("stop");
+                            ecb.AddComponent(entity, new LaserSoundRequest
+                            {
+                                Entity = entity,
+                                Position = laser.ValueRO.VFXLaserStartNode,
+                                IsFiring = false
+                            }); ;
                         }
 
                         // Hit
@@ -110,12 +119,27 @@ public partial struct VehicleFXSystem : ISystem
                         }
 
                         // Hit audio
-                        if (isHittingTarget && !fxManager.SFXLaserHit.isPlaying)
+                        if (isHittingTarget)
                         {
                             fxManager.SFXLaserHit.Play();
+                            if (!state.EntityManager.HasComponent<LaserHitSoundRequest>(entity))
+                            {
+                                ecb.AddComponent(entity, new LaserHitSoundRequest
+                                {
+                                    Entity = entity,
+                                    Position = laser.ValueRO.VFXLaserEndNode,
+                                    isGettingHit = true
+                                });
+                            }
                         }
-                        else if (!isHittingTarget && fxManager.SFXLaserHit.isPlaying)
+                        else if (!isHittingTarget)
                         {
+                            ecb.AddComponent(entity, new LaserHitSoundRequest
+                            {
+                                Entity = entity,
+                                Position = laser.ValueRO.VFXLaserEndNode,
+                                isGettingHit = false
+                            });
                             fxManager.SFXLaserHit.Stop();
                         }
                     }
@@ -124,13 +148,40 @@ public partial struct VehicleFXSystem : ISystem
                     {
                         if (vehicleHealth.ValueRO.IsDead == 0)
                         {
-                            
-                            float speedFactor = math.saturate(math.length(velocity.ValueRO.Linear) / 30f);
-                            fxManager.SFXCarSound.pitch = math.lerp(1f, 2f, speedFactor);
+                            if(!state.EntityManager.HasComponent<PreviousPosition>(entity))
+{
+                                ecb.AddComponent(entity, new PreviousPosition { Value = ltw.ValueRO.Position });
+                            }
+                            else
+                            {
+                                var prevPos = state.EntityManager.GetComponentData<PreviousPosition>(entity);
+                                float3 delta = ltw.ValueRO.Position - prevPos.Value;
+                                float realSpeed = math.length(delta) / SystemAPI.Time.DeltaTime;
+
+                                ecb.SetComponent(entity, new PreviousPosition { Value = ltw.ValueRO.Position });
+
+                                float idleFactor = math.saturate(realSpeed / 30f);
+
+                                // Now you use realSpeed/idleFactor for EngineSoundRequest
+                                ecb.AddComponent(entity, new EngineSoundRequest
+                                {
+                                    Entity = entity,
+                                    Position = ltw.ValueRO.Position,
+                                    IdleFactor = math.lerp(0f, 1f, idleFactor),
+                                    IsAlive = vehicleHealth.ValueRO.IsDead == 0
+                                });
+                            }
                         }
                         else
                         {
-                            fxManager.SFXCarSound.pitch = 0f;
+                            //fxManager.SFXCarSound.pitch = 0f;
+                            ecb.AddComponent(entity, new EngineSoundRequest
+                            {
+                                Entity = entity,
+                                Position = ltw.ValueRO.Position,
+                                IdleFactor = 0f,
+                                IsAlive = false
+                            });
                         }
                     }
 
@@ -200,6 +251,11 @@ public partial struct VehicleFXSystem : ISystem
                             {
                                 vehicleHealth.ValueRW._DeathFXState = 1;
                                 fxManager.SFXDeath.Play();
+                                ecb.AddComponent(entity, new SoundOneShotRequest
+                                {
+                                    EventPath = "event:/ShipKilled", 
+                                    Position = laser.ValueRO.VFXLaserEndNode
+                                });
                                 fxManager.VFXExplosion.Play();
                                 fxManager.VFXElecArcs.enabled = true;
                             }
@@ -216,5 +272,8 @@ public partial struct VehicleFXSystem : ISystem
                 }
             }
         }
+        ecb.Playback(state.EntityManager);
+        ecb.Dispose();
+
     }
 }

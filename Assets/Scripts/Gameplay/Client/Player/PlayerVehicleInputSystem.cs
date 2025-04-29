@@ -41,12 +41,12 @@ namespace Unity.MegacityMetro.Gameplay
         protected override void OnUpdate()
         {
             const float ConstLookVelocityMultiplier = 100f;
-            
+
             if (HybridCameraManager.Instance == null)
                 return;
 
             float deltaTime = SystemAPI.Time.DeltaTime;
-            
+
             if (m_GameInput == null)
             {
                 m_GameInput = new GameInput();
@@ -70,10 +70,10 @@ namespace Unity.MegacityMetro.Gameplay
                 AimAssistSensitivity = controlSettings.AimAssistanceSensitivity,
             };
 #else
-            
+
             var gameplayInputActions = m_GameInput.Gameplay;
-            
-            float2 lookInput = default; 
+
+            float2 lookInput = default;
             if (math.any(gameplayInputActions.LookDelta.ReadValue<Vector2>()))
             {
                 if (deltaTime != 0f)
@@ -99,14 +99,6 @@ namespace Unity.MegacityMetro.Gameplay
                 lookInput *= ConstLookVelocityMultiplier;
             }
 
-#if DEVELOPMENT_BUILD || UNITY_EDITOR
-            var cheatPressed = gameplayInputActions.Cheat_1.IsPressed();
-            if (cheatPressed)
-            {
-                UnityEngine.Debug.LogWarning("Cheat_1 pressed: input is registered!");
-            }
-#endif
-
             var input = new PlayerVehicleInput
             {
                 Acceleration = math.clamp(gameplayInputActions.Move.ReadValue<float>(), accelerationRange.x, accelerationRange.y),
@@ -114,14 +106,11 @@ namespace Unity.MegacityMetro.Gameplay
                 LookVelocity = lookInput,
                 Shoot = gameplayInputActions.Fire.IsPressed(),
                 AimAssistSensitivity = controlSettings.AimAssistanceSensitivity,
-#if DEVELOPMENT_BUILD || UNITY_EDITOR
-                Cheat_1 = cheatPressed
-#endif
+                Cheat_1 = gameplayInputActions.Cheat_1.IsPressed()
             };
-
 #endif
 
-            var job = new PlayerVehicleInputJob { CollectedInput = input};
+            var job = new PlayerVehicleInputJob { CollectedInput = input };
             job.Schedule();
         }
     }
@@ -129,6 +118,6 @@ namespace Unity.MegacityMetro.Gameplay
     [WorldSystemFilter(WorldSystemFilterFlags.LocalSimulation)]
     [UpdateInGroup(typeof(SimulationSystemGroup), OrderFirst = true)]
     public partial class PlayerVehicleInputSystemSinglePlayer : PlayerVehicleInputSystemBase
-    { 
+    {
     }
 }

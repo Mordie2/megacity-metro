@@ -6,7 +6,10 @@ using FMODUnity;
 public class FMODEvents : MonoBehaviour
 {
     [field: Header("SFX")]
-    [field: SerializeField] public EventReference Test { get; private set; }
+    [field: SerializeField] public EventReference ShipLaser { get; private set; }
+    [field: SerializeField] public EventReference ShipEngine { get; private set; }
+    [field: SerializeField] public EventReference LaserHit { get; private set; }
+    [field: SerializeField] public EventReference ShipKilled { get; private set; }
     public static FMODEvents instance { get; private set; }
 
     private void Awake()

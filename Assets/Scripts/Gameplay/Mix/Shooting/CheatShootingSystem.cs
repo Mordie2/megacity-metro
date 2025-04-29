@@ -16,7 +16,7 @@ namespace Unity.MegacityMetro.Gameplay
         {
             state.RequireForUpdate<NetworkTime>();
 #if !UNITY_EDITOR            
-            state.Enabled = false;
+            state.Enabled = true;
 #endif
         }
 
