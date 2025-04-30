@@ -25,7 +25,7 @@ namespace Unity.MegacityMetro.Gameplay
             var netTime = GetSingleton<NetworkTime>();
             if (!netTime.IsFirstTimeFullyPredictingTick)
                 return;
-            
+
             bool isServer = state.World.IsServer();
 
             foreach (var (ownerScore, input, playerName, health) in
