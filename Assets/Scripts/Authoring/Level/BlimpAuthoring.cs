@@ -1,3 +1,4 @@
+using FMODUnity;
 using Unity.Entities;
 using UnityEditor;
 using UnityEngine;
@@ -10,6 +11,7 @@ namespace Unity.MegacityMetro.Gameplay
         public float Radius = 80.0f;
         public float CircleLookAheadValue = 0.1f;
         public float RoationSpeed = 1f;
+        public StudioEventEmitter blimpEmitter;
 
 #if UNITY_EDITOR
         private Color GizmoColor = new Color(0.85f, 0.85f, 0.1f, 0.5f);

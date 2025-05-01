@@ -168,6 +168,7 @@ public partial struct VehicleFXSystem : ISystem
                                     Entity = entity,
                                     Position = ltw.ValueRO.Position,
                                     IdleFactor = math.lerp(0f, 1f, idleFactor),
+                                    DamageFactor = math.saturate(1f - (vehicleHealth.ValueRO.Value / 100f)),
                                     IsAlive = vehicleHealth.ValueRO.IsDead == 0
                                 });
                             }
@@ -179,6 +180,7 @@ public partial struct VehicleFXSystem : ISystem
                             {
                                 Entity = entity,
                                 Position = ltw.ValueRO.Position,
+                                DamageFactor = 0f,
                                 IdleFactor = 0f,
                                 IsAlive = false
                             });
@@ -196,6 +198,11 @@ public partial struct VehicleFXSystem : ISystem
                                     fxManager.VFXShield.SetFloat(ID_FXParam_ShieldLifetime, immunity.ValueRO.Duration);
                                 }
                                 fxManager.VFXShield.Play();
+                                ecb.AddComponent(entity, new SoundOneShotRequest
+                                {
+                                    EventPath = "event:/Shield",
+                                    Position = ltw.ValueRO.Position
+                                });
                                 immunity.ValueRW._immunityFXState = 1;
                             }
                         }
@@ -250,11 +257,11 @@ public partial struct VehicleFXSystem : ISystem
                             if (vehicleHealth.ValueRO._DeathFXState == 0)
                             {
                                 vehicleHealth.ValueRW._DeathFXState = 1;
-                                fxManager.SFXDeath.Play();
+                                //fxManager.SFXDeath.Play();
                                 ecb.AddComponent(entity, new SoundOneShotRequest
                                 {
                                     EventPath = "event:/ShipKilled", 
-                                    Position = laser.ValueRO.VFXLaserEndNode
+                                    Position = ltw.ValueRO.Position
                                 });
                                 fxManager.VFXExplosion.Play();
                                 fxManager.VFXElecArcs.enabled = true;

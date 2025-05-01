@@ -5,6 +5,8 @@ using Unity.MegacityMetro.Utils;
 using UnityEngine;
 using UnityEngine.UIElements;
 using System.Runtime.InteropServices;
+using Unity.Collections.LowLevel.Unsafe;
+using UnityEngine.Rendering;
 
 namespace Unity.MegacityMetro.UI
 {
@@ -51,7 +53,10 @@ namespace Unity.MegacityMetro.UI
             AudioMaster.Instance.music.audioMixer.SetFloat("music", Mathf.Log10((m_MusicSlider.value + k_MinVolume) / 100f) * 20 + m_MaxMusic);
             SetSpeakerVolume(m_VivoxVolumeSlider.value);
             SetMicrophoneVolume(m_VivoxMicrophoneSlider.value);
-        }
+            AudioManager.instance.masterVolume = (m_VolumeSlider.value + k_MinVolume) / 100f;
+            AudioManager.instance.SFXVolume = (m_SoundFXSlider.value + k_MinVolume) / 100f;
+            AudioManager.instance.MusicVolume = (m_MusicSlider.value + k_MinVolume) / 100f;
+        } 
 
         protected override void Initialize()
         {
@@ -68,9 +73,15 @@ namespace Unity.MegacityMetro.UI
 #if UNITY_ANDROID
             AudioMaster.Instance.OnDeviceVolumeReceived += OnDeviceVolumeReceived;
 #endif
+            /*
             AudioMaster.Instance.volume.audioMixer.GetFloat("volume", out m_MaxVolume);
             AudioMaster.Instance.soundFX.audioMixer.GetFloat("sound-fx", out m_MaxSoundFX);
             AudioMaster.Instance.music.audioMixer.GetFloat("music", out m_MaxMusic);
+            */
+
+            m_VolumeSlider.value = (int)(AudioManager.instance.masterVolume * 100f);
+            m_SoundFXSlider.value = (int)(AudioManager.instance.SFXVolume * 100f);
+            m_MusicSlider.value = (int)(AudioManager.instance.MusicVolume * 100f);
 
             m_VivoxVolumeSlider.RegisterValueChangedCallback(OnVivoxVolumeUpdated);
             m_VivoxMicrophoneSlider.RegisterValueChangedCallback(OnVivoxMicrophoneVolumeUpdated);
@@ -142,23 +153,28 @@ namespace Unity.MegacityMetro.UI
         private void OnMasterVolumeUpdated(ChangeEvent<int> value)
         {
             SetMasterVolume(Mathf.Log10((value.newValue + k_MinVolume) / 100f) * 20f + m_MaxVolume);
+            AudioManager.instance.masterVolume = Mathf.Clamp01(value.newValue / 100f);
         }
 
         private void SetMasterVolume(float volume)
         {
             AudioMaster.Instance.volume.audioMixer.SetFloat("volume", volume);
+
         }
 
         private void OnSoundFXUpdated(ChangeEvent<int> value)
         {
             AudioMaster.Instance.soundFX.audioMixer.SetFloat("sound-fx",
                 Mathf.Log10((value.newValue + k_MinVolume) / 100f) * 20 + m_MaxSoundFX);
+            AudioManager.instance.SFXVolume = Mathf.Clamp01(value.newValue / 100f);
+
         }
 
         private void OnMusicUpdated(ChangeEvent<int> value)
         {
             AudioMaster.Instance.music.audioMixer.SetFloat("music",
                 Mathf.Log10((value.newValue + k_MinVolume) / 100f) * 20 + m_MaxMusic);
+            AudioManager.instance.MusicVolume = Mathf.Clamp01(value.newValue / 100f);
         }
 
         private void OnVivoxMicrophoneVolumeUpdated(ChangeEvent<int> value)

@@ -10,14 +10,28 @@ public class FMODEvents : MonoBehaviour
     [field: SerializeField] public EventReference ShipEngine { get; private set; }
     [field: SerializeField] public EventReference LaserHit { get; private set; }
     [field: SerializeField] public EventReference ShipKilled { get; private set; }
+    [field: SerializeField] public EventReference Shield { get; private set; }
+    [field: SerializeField] public EventReference Damage { get; private set; }
+    [field: SerializeField] public EventReference TraficVehicle { get; private set; }
+    [field: SerializeField] public EventReference Click { get; private set; }
+
+    [field: Header("Music")]
+    [field: SerializeField] public EventReference Music { get; private set; }
     public static FMODEvents instance { get; private set; }
 
     private void Awake()
     {
         if (instance != null)
         {
-            Debug.LogError("Found more than one FMOD Events instance in the scene");
+
+            Debug.Log("Found more than one Audio Manager in the scene.");
+            Destroy(gameObject);
+
         }
-        instance = this;
+        else
+        {
+            instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
     }
 }

@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using FMODUnity;
 using FMOD.Studio;
+using UnityEngine.SceneManagement;
 
 public class AudioManager : MonoBehaviour
 {
@@ -9,7 +10,15 @@ public class AudioManager : MonoBehaviour
     [Range(0, 1)]
     public float masterVolume = 1;
 
+    [Range(0, 1)]
+    public float SFXVolume = 1;
+
+    [Range(0, 1)]
+    public float MusicVolume = 1;
+
     private Bus masterBus;
+    private Bus SFXBus;
+    private Bus MusicBus;
 
     private List<EventInstance> eventInstances;
     private List<StudioEventEmitter> eventEmitters;
@@ -20,13 +29,18 @@ public class AudioManager : MonoBehaviour
     private Dictionary<string, EventInstance> persistentInstances = new();
 
 
+    private string sceneName;
+    public EventInstance MusicInstance;
+
+
     void Awake()
     {
+        sceneName = SceneManager.GetActiveScene().name;
 
         if (instance != null)
         {
             if (useDebug)
-                Debug.LogError("Found more than one Audio Manager in the scene.");
+                Debug.Log("Found more than one Audio Manager in the scene.");
 
             Destroy(gameObject);
             return;
@@ -37,15 +51,63 @@ public class AudioManager : MonoBehaviour
 
         eventInstances = new List<EventInstance>();
         eventEmitters = new List<StudioEventEmitter>();
-
         masterBus = RuntimeManager.GetBus("bus:/");
+        SFXBus = RuntimeManager.GetBus("bus:/SFX");
+        MusicBus = RuntimeManager.GetBus("bus:/Music");
+
+        SceneManager.sceneLoaded += OnSceneLoaded;
+
+        // Manually trigger for the already-loaded first scene
+        OnSceneLoaded(SceneManager.GetActiveScene(), LoadSceneMode.Single);
     }
 
+
+
+    public void CheckIfSceneChange()
+    {
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        sceneName = SceneManager.GetActiveScene().name;
+        Debug.Log(sceneName);
+
+        CleanUp();
+        InitializeMusic(FMODEvents.instance.Music);
+
+    }
+
+    private void InitializeMusic(EventReference MusicReference)
+    {
+        Debug.Log("Initializing music for: " + sceneName);
+        MusicInstance = CreateInstance(MusicReference);
+
+        if (MusicInstance.isValid())
+        {
+            MusicInstance.start();
+        }
+        else
+        {
+            Debug.LogWarning("MusicInstance is not valid.");
+        }
+
+        if (sceneName == "Menu")
+        {
+            SetInstanceParameter(MusicInstance, "musicintensity", 0);
+        }
+        else if (sceneName == "Main")
+        {
+            SetInstanceParameter(MusicInstance, "musicintensity", 1);
+        }
+    }
 
 
     private void Update()
     {
         masterBus.setVolume(masterVolume);
+        SFXBus.setVolume(SFXVolume);
+        MusicBus.setVolume(MusicVolume);
     }
 
 
@@ -64,19 +126,32 @@ public class AudioManager : MonoBehaviour
 
     private void CleanUp()
     {
-        foreach (EventInstance eventInstance in eventInstances)
+        if (eventInstances != null)
         {
-            eventInstance.stop(FMOD.Studio.STOP_MODE.IMMEDIATE);
-            eventInstance.release();
+            foreach (EventInstance eventInstance in eventInstances)
+            {
+                eventInstance.stop(FMOD.Studio.STOP_MODE.IMMEDIATE);
+                eventInstance.release();
+            }
+
+            eventInstances.Clear();
         }
 
-        eventInstances.Clear();
+        if (eventEmitters != null)
+        {
+            eventEmitters.Clear();
+        }
     }
+
 
     private void OnDestroy()
     {
-        CleanUp();
+        if (instance == this)
+        {
+            CleanUp();
+        }
     }
+
 
     public EventInstance CreateInstance(EventReference eventReference)
     {

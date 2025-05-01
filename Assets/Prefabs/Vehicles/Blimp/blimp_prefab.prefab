@@ -102,6 +102,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 2180184697291096095}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 3538fea7c24d4e142899726d3736b8ff,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4247669022697225060}
   m_SourcePrefab: {fileID: 100100000, guid: 3538fea7c24d4e142899726d3736b8ff, type: 3}
 --- !u!1 &1898323185549749732 stripped
 GameObject:
@@ -147,6 +151,7 @@ MonoBehaviour:
   Radius: 255
   CircleLookAheadValue: 0.1
   RoationSpeed: 0.5
+  blimpEmitter: {fileID: 4247669022697225060}
 --- !u!114 &7135466211292169130
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -175,12 +180,14 @@ MonoBehaviour:
   SupportedGhostModes: 3
   OptimizationMode: 0
   Importance: 1
-  prefabId: f62296bd341aa574b8a836006fafd9a0
+  prefabId: 6375447c94d36eb4bb1165f10f472c2a
   HasOwner: 0
   SupportAutoCommandTarget: 1
   TrackInterpolationDelay: 0
   GhostGroup: 0
   UsePreSerialization: 0
+  RollbackPredictedSpawnedGhostState: 0
+  RollbackPredictionOnStructuralChanges: 1
 --- !u!114 &2180184697291096095
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -194,3 +201,34 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ComponentOverrides: []
+--- !u!114 &4247669022697225060
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1898323185549749732}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a6610d2e704f1648819acc8d7460285, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  CollisionTag: 
+  EventReference:
+    Guid:
+      Data1: 463652993
+      Data2: 1114017134
+      Data3: 1258014393
+      Data4: 233841544
+    Path: event:/TraficVehicle
+  Event: 
+  EventPlayTrigger: 1
+  EventStopTrigger: 2
+  AllowFadeout: 1
+  TriggerOnce: 1
+  Preload: 0
+  NonRigidbodyVelocity: 0
+  Params: []
+  OverrideAttenuation: 0
+  OverrideMinDistance: 1
+  OverrideMaxDistance: 20

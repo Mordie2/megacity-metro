@@ -30,7 +30,7 @@ public partial class EngineSoundSystem : SystemBase
             {
                 if (!_activeEngines.TryGetValue(entity, out var instance))
                 {
-                    instance = RuntimeManager.CreateInstance(FMODEvents.instance.ShipEngine);
+                    instance = AudioManager.instance.CreateInstance(FMODEvents.instance.ShipEngine);
                     instance.set3DAttributes(RuntimeUtils.To3DAttributes(request.Position));
                     instance.start();
                     _activeEngines.Add(entity, instance);
@@ -42,6 +42,7 @@ public partial class EngineSoundSystem : SystemBase
 
                 // Update "Idle" parameter
                 _activeEngines[entity].setParameterByName("Idle", request.IdleFactor);
+                _activeEngines[entity].setParameterByName("Damage", request.DamageFactor);
             }
             else
             {

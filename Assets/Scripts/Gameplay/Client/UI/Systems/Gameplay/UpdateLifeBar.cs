@@ -35,41 +35,52 @@ namespace Unity.MegacityMetro.UI
             const float delayForShaking = 1.2f;
             const float relaxingDamage = 0.25f;
             var currentTime = state.World.Time.ElapsedTime;
-            foreach (var vehicleHealth in SystemAPI.Query<VehicleHealth>().WithAll<GhostOwnerIsLocal>())
+
+            var ecb = new EntityCommandBuffer(Unity.Collections.Allocator.Temp);
+
+            foreach (var (vehicleHealth, entity) in SystemAPI.Query<VehicleHealth>().WithAll<GhostOwnerIsLocal>().WithEntityAccess())
             {
                 var currentLife = vehicleHealth.Value;
 
-                //set life the first time
                 if (m_PreviousLife.Equals(default))
                 {
-                    m_PreviousLife = currentLife;    
+                    m_PreviousLife = currentLife;
                     HUD.Instance.UpdateLife(currentLife, vehicleHealth.LookAtEnemyDegrees);
                 }
-                
+
                 if (m_PreviousLife != currentLife)
                 {
-                    // force the start receiving damage to be called only once when receiving the first hit.
                     if (m_CanShakeTheCamera && m_PreviousLife > currentLife)
                     {
                         m_StartShakingCameraTime = currentTime;
                         HybridCameraManager.Instance.StartShaking();
                         m_CanShakeTheCamera = false;
+
+                        if (!state.EntityManager.HasComponent<DamageSoundRequest>(entity))
+                            ecb.AddComponent(entity, new DamageSoundRequest { Play = true });
+                        else
+                            ecb.SetComponent(entity, new DamageSoundRequest { Play = true });
                     }
-                    
+
                     m_ReceivingDamageTime = currentTime;
                     HUD.Instance.UpdateLife(currentLife, vehicleHealth.LookAtEnemyDegrees);
                     m_PreviousLife = currentLife;
                 }
-                else if(m_ReceivingDamageTime + relaxingDamage < currentTime)
+                else if (m_ReceivingDamageTime + relaxingDamage < currentTime)
                 {
                     HUD.Instance.DisableDamageIndicator(currentLife);
+
+                    if (state.EntityManager.HasComponent<DamageSoundRequest>(entity))
+                        ecb.SetComponent(entity, new DamageSoundRequest { Play = false });
                 }
-                
-                if(m_StartShakingCameraTime + delayForShaking < currentTime && !m_CanShakeTheCamera)
-                {
+
+                if (m_StartShakingCameraTime + delayForShaking < currentTime && !m_CanShakeTheCamera)
                     m_CanShakeTheCamera = true;
-                }
             }
+
+            ecb.Playback(state.EntityManager);
+            ecb.Dispose();
         }
+
     }
 }
