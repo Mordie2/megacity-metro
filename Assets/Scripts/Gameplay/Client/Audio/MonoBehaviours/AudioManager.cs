@@ -23,16 +23,11 @@ public class AudioManager : MonoBehaviour
     private List<EventInstance> eventInstances;
     private List<StudioEventEmitter> eventEmitters;
     public bool useDebug;
-
     public static AudioManager instance { get; private set; }
-
     private Dictionary<string, EventInstance> persistentInstances = new();
-
-
     private string sceneName;
     public EventInstance MusicInstance;
     public EventInstance AmbianceInstance;
-
 
     void Awake()
     {
@@ -58,11 +53,8 @@ public class AudioManager : MonoBehaviour
 
         SceneManager.sceneLoaded += OnSceneLoaded;
 
-        // Manually trigger for the already-loaded first scene
         OnSceneLoaded(SceneManager.GetActiveScene(), LoadSceneMode.Single);
     }
-
-
 
     public void CheckIfSceneChange()
     {
@@ -106,14 +98,12 @@ public class AudioManager : MonoBehaviour
         }
     }
 
-
     private void Update()
     {
         masterBus.setVolume(masterVolume);
         SFXBus.setVolume(SFXVolume);
         MusicBus.setVolume(MusicVolume);
     }
-
 
     public void PlayOneShot(EventReference sound, Vector3 worldPos)
     {
@@ -147,7 +137,6 @@ public class AudioManager : MonoBehaviour
         }
     }
 
-
     private void OnDestroy()
     {
         if (instance == this)
@@ -155,7 +144,6 @@ public class AudioManager : MonoBehaviour
             CleanUp();
         }
     }
-
 
     public EventInstance CreateInstance(EventReference eventReference)
     {
@@ -193,7 +181,6 @@ public class AudioManager : MonoBehaviour
 
         return false;
     }
-
 
     public void SetInstanceParameter(EventInstance eventInstance, string parameterName, float parameterValue)
     {
@@ -242,7 +229,6 @@ public class AudioManager : MonoBehaviour
         }
         return false;
     }
-
 
     public static void Nullify()
     {

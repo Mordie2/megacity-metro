@@ -159,11 +159,8 @@ public partial struct VehicleFXSystem : ISystem
                                 float realSpeed = math.length(delta) / SystemAPI.Time.DeltaTime;
                                 //Debug.Log(math.lerp(0f, 1f,realSpeed /100f));
                                 ecb.SetComponent(entity, new PreviousPosition { Value = ltw.ValueRO.Position });
-
-                                float idleFactor = math.saturate(realSpeed / 30f);
-
-                                //Debug.Log(math.lerp(0f, 1f, idleFactor));
-                               
+                                //float idleFactor = math.saturate(realSpeed / 30f);
+                                //Debug.Log(math.lerp(0f, 1f, idleFactor));                             
                                 ecb.AddComponent(entity, new EngineSoundRequest
                                 {
                                     Entity = entity,

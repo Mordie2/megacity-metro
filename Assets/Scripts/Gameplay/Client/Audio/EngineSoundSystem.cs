@@ -40,7 +40,6 @@ public partial class EngineSoundSystem : SystemBase
                     instance.set3DAttributes(RuntimeUtils.To3DAttributes(request.Position));
                 }
 
-                // Update "Idle" parameter
                 _activeEngines[entity].setParameterByName("Idle", request.IdleFactor);
                 _activeEngines[entity].setParameterByName("Damage", request.DamageFactor);
             }
