@@ -31,6 +31,7 @@ public class AudioManager : MonoBehaviour
 
     private string sceneName;
     public EventInstance MusicInstance;
+    public EventInstance AmbianceInstance;
 
 
     void Awake()
@@ -82,7 +83,7 @@ public class AudioManager : MonoBehaviour
     {
         Debug.Log("Initializing music for: " + sceneName);
         MusicInstance = CreateInstance(MusicReference);
-
+        AmbianceInstance = CreateInstance(FMODEvents.instance.Ambience);
         if (MusicInstance.isValid())
         {
             MusicInstance.start();
@@ -95,10 +96,13 @@ public class AudioManager : MonoBehaviour
         if (sceneName == "Menu")
         {
             SetInstanceParameter(MusicInstance, "musicintensity", 0);
+            AmbianceInstance.stop(FMOD.Studio.STOP_MODE.IMMEDIATE);
         }
         else if (sceneName == "Main")
         {
             SetInstanceParameter(MusicInstance, "musicintensity", 1);
+            AmbianceInstance.start();
+            AmbianceInstance.release();
         }
     }
 

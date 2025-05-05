@@ -5,6 +5,7 @@ using FMOD.Studio;
 using Unity.Collections;
 using System.Collections.Generic;
 using Unity.NetCode;
+using UnityEngine.UIElements;
 
 [UpdateInGroup(typeof(PresentationSystemGroup))]
 [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation | WorldSystemFilterFlags.LocalSimulation)]
@@ -34,6 +35,7 @@ public partial class DamageSoundSystem : SystemBase
                 if (!_activeDamageInstances.TryGetValue(entity, out var instance))
                 {
                     instance = AudioManager.instance.CreateInstance(FMODEvents.instance.Damage);
+                    instance.set3DAttributes(RuntimeUtils.To3DAttributes(Vector3.zero));
                     instance.start();
                     _activeDamageInstances[entity] = instance;
                     Debug.Log($"[DamageSoundSystem] Started for {entity.Index}");

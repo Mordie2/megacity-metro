@@ -3,6 +3,8 @@ using Unity.MegacityMetro.CameraManagement;
 using Unity.MegacityMetro.Gameplay;
 using Unity.NetCode;
 
+
+
 namespace Unity.MegacityMetro.UI
 {
     /// <summary>
@@ -29,6 +31,8 @@ namespace Unity.MegacityMetro.UI
 
         public void OnUpdate(ref SystemState state)
         {
+            var ecb = new EntityCommandBuffer(Unity.Collections.Allocator.Temp);
+
             if (HUD.Instance == null)
                 return;
 
@@ -36,7 +40,7 @@ namespace Unity.MegacityMetro.UI
             const float relaxingDamage = 0.25f;
             var currentTime = state.World.Time.ElapsedTime;
 
-            var ecb = new EntityCommandBuffer(Unity.Collections.Allocator.Temp);
+
 
             foreach (var (vehicleHealth, entity) in SystemAPI.Query<VehicleHealth>().WithAll<GhostOwnerIsLocal>().WithEntityAccess())
             {
@@ -56,10 +60,9 @@ namespace Unity.MegacityMetro.UI
                         HybridCameraManager.Instance.StartShaking();
                         m_CanShakeTheCamera = false;
 
-                        if (!state.EntityManager.HasComponent<DamageSoundRequest>(entity))
-                            ecb.AddComponent(entity, new DamageSoundRequest { Play = true });
-                        else
-                            ecb.SetComponent(entity, new DamageSoundRequest { Play = true });
+
+                        ecb.AddComponent(entity, new DamageSoundRequest { Play = true });
+   
                     }
 
                     m_ReceivingDamageTime = currentTime;
@@ -70,8 +73,8 @@ namespace Unity.MegacityMetro.UI
                 {
                     HUD.Instance.DisableDamageIndicator(currentLife);
 
-                    if (state.EntityManager.HasComponent<DamageSoundRequest>(entity))
-                        ecb.SetComponent(entity, new DamageSoundRequest { Play = false });
+                  
+                        ecb.AddComponent(entity, new DamageSoundRequest { Play = false });
                 }
 
                 if (m_StartShakingCameraTime + delayForShaking < currentTime && !m_CanShakeTheCamera)
